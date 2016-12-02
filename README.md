@@ -1,6 +1,6 @@
 # PassengerMonitor
 
-This gem monitors passenger workers of your application and if the workers exceed the memory limit then it kills it (first gracefully, wait and then forcefully). It fetches the memory of passenger workers from the system command `passenger-memory-stats`, checks the memory of each worker **concurrently (using thread)** and kills them if it finds any worker bloated. First, it kills the process gracefully and wait for it to die, if the process still appears then it kills it forcefully
+This gem monitors passenger workers of your application and if the workers exceed the memory limit then it kills them (first gracefully, waits and then forcefully). It fetches the memory of the passenger workers from the system command `passenger-memory-stats`, checks the memory of each worker **concurrently (using threads)** and kills them if it finds them bloated. First, it kills the process gracefully and wait for it to die, if the process still appears then it kills it forcefully
 
 ## Installation
 
@@ -23,7 +23,10 @@ Or install it yourself as:
 The gem provides a service class which can be initialized to check the passenger workers.
 
 ```ruby
-PassengerMonitor.run({:memory_limit=>"150", :log_file=>"passenger_config.log", :wait_time=>"15", :process_name_regex=>"passenger"})
+PassengerMonitor.run({:memory_limit=>"150",
+                      :log_file=>"passenger_config.log",
+                      :wait_time=>"15",
+                      :process_name_regex=>"passenger"})
 ```
 
 **Parameters options:**
@@ -32,7 +35,7 @@ PassengerMonitor.run({:memory_limit=>"150", :log_file=>"passenger_config.log", :
 3. **:wait_time**: the time to wait to kill the worker forcefully
 4. **:process_name_regex**: regex for the passenger worker of the application
 
-### Using Rake task:
+### Use Rake task
 It also provides a rake task which can be scheduled in cron tasks. To load tasks add following lines in your `Rakefile`:
 
 ```ruby
