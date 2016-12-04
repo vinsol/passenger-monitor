@@ -1,6 +1,6 @@
 # PassengerMonitor
 
-[![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/codeclimate/codeclimate)
+[![Code Climate](https://codeclimate.com/github/vinsol/passenger-monitor/badges/gpa.svg)](https://codeclimate.com/github/vinsol/passenger-monitor)
 
 This gem monitors passenger workers of your application and if the workers exceed the memory limit then it kills them (first gracefully, waits and then forcefully). It fetches the memory of the passenger workers from the system command `passenger-memory-stats`, checks the memory of each worker **concurrently (using threads)** and kills them if it finds them bloated. First, it kills the process gracefully and wait for it to die, if the process still appears then it kills it forcefully
 
