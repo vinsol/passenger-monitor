@@ -27,10 +27,10 @@ module PassengerMonitor
     # Sets memory limit, log file, wait time, process name regex and logger
     #
     def initialize(params = {})
-      @memory_limit = params[:memory_limit].to_f || DEFAULT_MEMORY_LIMIT
-      @log_file = params[:log_file] || DEFAULT_LOG_FILE
-      @wait_time = params[:wait_time].to_i || DEFAULT_WAIT_TIME
-      @process_name_regex = Regexp.new(params[:process_name_regex]) || DEFAULT_PROCESS_NAME_REGEX
+      @memory_limit = fetch_memory_limit(params)
+      @log_file = fetch_log_file(params)
+      @wait_time = fetch_wait_time(params)
+      @process_name_regex = fetch_process_name_regex(params)
       @logger = Logger.new(@log_file)
     end
 
@@ -41,7 +41,8 @@ module PassengerMonitor
       @logger.info 'Checking bloated Passenger workers'
 
       threads = []
-      `passenger-memory-stats`.each_line do |line|
+
+      passenger_workers_details.each_line do |line|
         next unless (line =~ @process_name_regex)
 
         pid, memory_usage =  extract_stats(line)
@@ -66,6 +67,7 @@ module PassengerMonitor
     # == Parameters:
     # pid::
     #   Process ID.
+    #
     def handle_bloated_process(pid)
       kill(pid)
       wait
@@ -73,6 +75,33 @@ module PassengerMonitor
     end
 
     private
+
+    def fetch_memory_limit(params)
+      params.key?(:memory_limit) ? params[:memory_limit].to_f : DEFAULT_MEMORY_LIMIT
+    end
+
+    def fetch_log_file(params)
+      params.key?(:log_file) ? params[:log_file] : DEFAULT_LOG_FILE
+    end
+
+    def fetch_wait_time(params)
+      params.key?(:wait_time) ? params[:wait_time].to_i : DEFAULT_WAIT_TIME
+    end
+
+    def fetch_process_name_regex(params)
+      if params.key?(:process_name_regex)
+        Regexp.new(params[:process_name_regex].to_s)
+      else
+        DEFAULT_PROCESS_NAME_REGEX
+      end
+    end
+
+    # Fetches the stats of passenger-memory-stats from system.
+    # Using `env -i` to remove surrounding environment of bundle.
+    def passenger_workers_details
+      passenger_memory_status_path = `env -i which passenger-memory-stats`
+      `env -i #{ passenger_memory_status_path }`
+    end
 
     # Checks if a given process is still running
     # == Parameters:
@@ -97,13 +126,13 @@ module PassengerMonitor
       Process.kill("SIGUSR1", pid)
     end
 
-    # Kill it with fire
+    # Kill it forcefully
     def kill!(pid)
       @logger.fatal "Force kill: #{pid}"
       Process.kill("TERM", pid)
     end
 
-    # Extracts pid and memory usage of a single Passenger
+    # Extracts pid and memory usage of a single Passenger worker
     def extract_stats(line)
       stats = line.split
       return stats[0].to_i, stats[3].to_f

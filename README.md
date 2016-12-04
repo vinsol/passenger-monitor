@@ -40,7 +40,7 @@ It also provides a rake task which can be scheduled in cron tasks. To load tasks
 
 ```ruby
 spec = Gem::Specification.find_by_name 'passenger_monitor'
-Dir.glob("#{spec.gem_dir}/lib/tasks/*.rake").each {|r| puts r; load r}
+Dir.glob("#{spec.gem_dir}/lib/tasks/*.rake").each { |task_file| load task_file }
 ```
 Now rake task `passenger:monitor` will be available. For custom configuration, send arguments in task in following order: `:memory_limit, :log_file, :wait_time, :process_name_regex`:
 
