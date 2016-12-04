@@ -32,6 +32,12 @@ describe PassengerMonitor::Monitor do
   let(:object_with_params) { PassengerMonitor::Monitor.new(params) }
   let(:object_without_params) { PassengerMonitor::Monitor.new }
 
+  after do
+    ["passenger_monitoring.log", "passenger_monitor.log"].each do |file_name|
+      `rm #{file_name}`
+    end
+  end
+
   describe 'Constants' do
     it 'PassengerMonitor::Monitor::DEFAULT_MEMORY_LIMIT => 150' do
       expect(PassengerMonitor::Monitor::DEFAULT_MEMORY_LIMIT).to eq(150)
