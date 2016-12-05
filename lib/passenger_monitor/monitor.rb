@@ -27,6 +27,7 @@ module PassengerMonitor
     # Sets memory limit, log file, wait time, process name regex and logger
     #
     def initialize(params = {})
+      params = params.to_hash
       @memory_limit = fetch_memory_limit(params)
       @log_file = fetch_log_file(params)
       @wait_time = fetch_wait_time(params)
